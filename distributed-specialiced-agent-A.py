@@ -7,7 +7,7 @@ from langchain_core.prompts import ChatPromptTemplate
 KAFKA_BOOTSTRAP_SERVERS = 'localhost:9092'  # Reemplaza con tus servidores Kafka
 INPUT_TOPIC = 'preguntas'
 OUTPUT_TOPIC = 'respuestas'
-GROUP_ID = 'agente_colores' # Reemplaza con un ID de grupo para el consumidor
+GROUP_ID = 'agent_A' # Reemplaza con un ID de grupo para el consumidor
 
 # Configuración de Ollama
 OLLAMA_BASE_URL = "http://localhost:11434" # Reemplaza con la URL de tu instancia de Ollama
