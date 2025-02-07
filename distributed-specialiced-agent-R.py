@@ -7,11 +7,11 @@ from langchain_core.prompts import ChatPromptTemplate
 KAFKA_BOOTSTRAP_SERVERS = 'localhost:9092'  # Reemplaza con tus servidores Kafka
 INPUT_TOPIC = 'preguntas'
 OUTPUT_TOPIC = 'respuestas'
-GROUP_ID = 'agente_colores' # Reemplaza con un ID de grupo para el consumidor
+GROUP_ID = 'agent_R' # Reemplaza con un ID de grupo para el consumidor
 
 # Configuración de Ollama
 OLLAMA_BASE_URL = "http://localhost:11434" # Reemplaza con la URL de tu instancia de Ollama
-MODEL = "gemma2" # Reemplaza con el modelo que quieres usar
+MODEL = "gemma2:latest" # Reemplaza con el modelo que quieres usar
 
 
 def main():
@@ -64,20 +64,20 @@ def main():
                 ]
 
                 ollama_response = llm.invoke(messages)  # El LLM ahora recibe un string
-                
+
                 print(ollama_response)
-               
+
                 string_response = ollama_response.content
                 print(f"Respuesta de Ollama: {string_response}")
-                
+
                 if "Pass" not in string_response:
                     # Envío de la respuesta al topic de salida
                     producer.produce(OUTPUT_TOPIC, value=string_response)
                     producer.flush() # Asegura que el mensaje se envíe inmediatamente.
                     print(f"Respuesta enviada al topic {OUTPUT_TOPIC}")
                     consumer.commit()
-            
-                
+
+
 
             except Exception as e:
                 print(f"Error al procesar el evento: {e}")
