@@ -1,6 +1,7 @@
 import pika
 from llama_index.llms.ollama import Ollama
 from llama_index.core.llms import ChatMessage
+import json
 
 # Configuración de RabbitMQ con credenciales
 RABBITMQ_HOST = 'localhost'  # Reemplaza con tu host de RabbitMQ
@@ -33,8 +34,11 @@ def main():
     channel.queue_bind(queue=INPUT_QUEUE, exchange=INPUT_EXCHANGE)
 
     def callback(ch, method, properties, body):
-        event = body.decode('utf-8')  # Decodificar el mensaje de bytes a string
-        print(f"Evento recibido: {event}")
+        message_json = json.loads(body.decode('utf-8'))
+        transaction_id = message_json.get("transaction_id")
+        message = message_json.get("message")
+
+        print(f"Received message: {message_json}")
 
         try:
             messages = [
@@ -43,23 +47,35 @@ def main():
                                   Only answer "R" if you are asked to spell a word with the letter R in it. Any other case answer "Pass".
                                   Do not give any extra information."""
                 ),
-                ChatMessage(role="user", content=f"{event}"),
-]
+                ChatMessage(role="user", content=f"{message}"),
+            ]
             response = llm.chat(messages)  # Usar LLMPredictor
             string_response = str(response).strip()  # Eliminar espacios en blanco alrededor de la respuesta.
             print(f"Respuesta de Ollama: {string_response}")
 
             if "Pass" not in string_response:
-                # Envío de la respuesta a la cola de salida
-                channel.basic_publish(exchange=OUTPUT_QUEUE, routing_key="", body=string_response)
-                print(f"Respuesta enviada a la cola {OUTPUT_QUEUE}")
+                output_message = {
+                    "transaction_id": transaction_id,
+                    "response": string_response,
+                    "description": f"Agent {IDENTIFIER} is in charge of providing the letter R for a spelling request",  # Include agent description
+                }
 
-            ch.basic_ack(delivery_tag=method.delivery_tag)  # Confirmar el mensaje
+                channel.basic_publish(
+                    exchange="",
+                    routing_key=transaction_id,
+                    body=json.dumps(output_message)  # Send JSON response
+                )
+                print(f"Response sent to queue {OUTPUT_QUEUE}: {output_message}")
 
+            ch.basic_ack(delivery_tag=method.delivery_tag)
+
+        except json.JSONDecodeError:
+            print(f"Error: Invalid JSON received: {body.decode('utf-8')}")
+            ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False) #Nack the message to avoid infinite loop
         except Exception as e:
-            print(f"Error al procesar el evento: {e}")
-            ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)  # Rechazar el mensaje y no volver a enviarlo.
-
+            print(f"Error processing event: {e}")
+            ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
+            
     # Consumir mensajes de la cola de entrada
     channel.basic_consume(queue=INPUT_QUEUE, on_message_callback=callback)
 

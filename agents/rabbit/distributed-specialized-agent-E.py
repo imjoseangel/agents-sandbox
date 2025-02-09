@@ -7,7 +7,7 @@ import json
 RABBITMQ_HOST = 'localhost'  # Reemplaza con tu host de RabbitMQ
 RABBITMQ_USER = 'user'  # Reemplaza con tu usuario de RabbitMQ
 RABBITMQ_PASSWORD = 'password'  # Reemplaza con tu contraseña de RabbitMQ
-IDENTIFIER = 'Agent_A'
+IDENTIFIER = 'Agent_E'
 INPUT_EXCHANGE = 'preguntas'
 INPUT_QUEUE = f'{INPUT_EXCHANGE}.{IDENTIFIER}'
 OUTPUT_QUEUE = 'respuestas'
@@ -43,8 +43,8 @@ def main():
         try:
             messages = [
                 ChatMessage(
-                    role="system", content=""" You are in charge of providing the letter A for a spelling request.
-                                  Only answer "A" if you are asked to spell a word that contains the letter A in it. Any other case answer "Pass".
+                    role="system", content=""" You are in charge of providing the letter E for a spelling request.
+                                  Only answer "R" if you are asked to spell a word with the letter E in it. Any other case answer "Pass".
                                   Do not give any extra information."""
                 ),
                 ChatMessage(role="user", content=f"{message}"),
@@ -57,7 +57,7 @@ def main():
                 output_message = {
                     "transaction_id": transaction_id,
                     "response": string_response,
-                    "description": f"Agent {IDENTIFIER} is in charge of providing the letter A for a spelling request",  # Include agent description
+                    "description": f"Agent {IDENTIFIER} is in charge of providing the letter E for a spelling request",  # Include agent description
                 }
 
                 channel.basic_publish(
