@@ -82,6 +82,8 @@ def main():
         
         all_messages_received = consume_messages_after_delay(channel,transaction_id,5)
         
+        channel.queue_delete(transaction_id)
+        
         converted_to_chat = [ChatMessage(role="user", content=f"Answer: {response["response"]} . Description: {response["description"]}") for response in all_messages_received]
         
         system_message = [
