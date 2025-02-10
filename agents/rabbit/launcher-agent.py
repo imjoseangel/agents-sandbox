@@ -47,8 +47,6 @@ def main():
 
         # Declaración de colas (si no existen)
         channel.exchange_declare(exchange=QUESTION_EXCHANGE,exchange_type="fanout")
-        channel.queue_declare(queue=QUESTION_QUEUE)
-        channel.queue_bind(queue=QUESTION_QUEUE,exchange=QUESTION_EXCHANGE)
         # Declaración de colas (si no existen)
         channel.exchange_declare(exchange=ANSWER_EXCHANGE,exchange_type="fanout")
         channel.queue_declare(queue=ANSWER_QUEUE)
