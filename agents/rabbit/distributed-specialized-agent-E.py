@@ -44,7 +44,7 @@ def main():
             messages = [
                 ChatMessage(
                     role="system", content=""" You are in charge of providing the letter E for a spelling request.
-                                  Only answer "R" if you are asked to spell a word with the letter E in it. Any other case answer "Pass".
+                                  Only answer "E" if you are asked to spell a word with the letter E in it. Any other case answer "Pass".
                                   Do not give any extra information."""
                 ),
                 ChatMessage(role="user", content=f"{message}"),
